@@ -8,6 +8,7 @@ import com.example.shop.model.Role;
 import com.example.shop.model.User;
 import com.example.shop.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +32,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
     private final UserService userService;
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getUsers() {
+
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
@@ -56,6 +59,18 @@ public class UserController {
         userService.addRoleToUser(form.getUserName(), form.getRoleName());
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/usersByLocation/{location}")
+    public ResponseEntity<List<User>> getUsersByLocation(@PathVariable String location) {
+
+        return ResponseEntity.ok().body(userService.findUserByLocation(location));
+    }
+    @GetMapping("/moreThanAge/{age}")
+    public ResponseEntity<List<User>> getUsersByLocation(@PathVariable int age) {
+
+        return ResponseEntity.ok().body(userService.moreThanAge(age));
+    }
+
 
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {

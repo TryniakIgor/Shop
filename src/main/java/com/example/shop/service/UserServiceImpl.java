@@ -1,5 +1,6 @@
 package com.example.shop.service;
 
+import com.example.shop.model.Location;
 import com.example.shop.model.Role;
 import com.example.shop.model.User;
 import com.example.shop.repository.RoleRepo;
@@ -17,6 +18,8 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -73,4 +76,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), authorities);
     }
+
+    @Override
+    public List<User> findUserByLocation (String location){
+        Location location1 = Location.valueOf(location.toUpperCase());
+        List<User> users = userRepo.findByLocation(location1);
+        return users;
+    }
+
+    @Override
+    public List<User> moreThanAge(int age){
+        return userRepo.findAll().stream().filter(user -> user.getAge() > age ).collect(Collectors.toList());
+    }
+
+
 }
