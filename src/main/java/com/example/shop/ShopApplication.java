@@ -35,10 +35,10 @@ public class ShopApplication {
 //		userService.saveRole(new Role(null, "SUPER_ADMIN"));
 //		userService.saveRole(new Role(null, "SELLER"));
 //
-//		userService.saveUser(new User(null, "John Dou", "john","1111",new ArrayList<>()));
-//		userService.saveUser(new User(null, "Jack Rassel", "jack","1234",new ArrayList<>()));
-//		userService.saveUser(new User(null, "Luk Skywocker", "luk","qwwer",new ArrayList<>()));
-//		userService.saveUser(new User(null, "Jessica Alba", "jess","0000",new ArrayList<>()));
+//		userService.saveUser(new User(null, "John Dou", "john","1111", 22,new ArrayList<>()));
+//		userService.saveUser(new User(null, "Jack Rassel", "jack","1234", 25, new ArrayList<>()));
+//		userService.saveUser(new User(null, "Luk Skywocker", "luk","qwwer", 33, new ArrayList<>()));
+//		userService.saveUser(new User(null, "Jessica Alba", "jess","0000",38, new ArrayList<>()));
 //
 //		userService.addRoleToUser("john", "ADMIN");
 //		userService.addRoleToUser("jack", "MANAGER");

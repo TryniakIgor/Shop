@@ -10,11 +10,9 @@ import java.util.List;
 public interface UserRepo extends JpaRepository<User, Long> {
     User findByUserName(String userName);
 
-    @Query("select u from Department d \n" +
-            "left join d.users u\n" +
-            "where d.location = :location")
+    @Query("select u from Department d left join d.users where d.location = :location")
     List<User> findByLocation(Location location);
 
-
-
+    @Query ("UPDATE users u SET is_deleted = true WHERE u.name =:userName ")
+    User delete(String userName);
 }

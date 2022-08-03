@@ -1,5 +1,7 @@
 package com.example.shop.service;
 
+import com.example.shop.dto.UserDTO;
+import com.example.shop.mapper.UserMapper;
 import com.example.shop.model.Location;
 import com.example.shop.model.Role;
 import com.example.shop.model.User;
@@ -7,6 +9,7 @@ import com.example.shop.repository.RoleRepo;
 import com.example.shop.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,9 +28,12 @@ import java.util.stream.Collectors;
 @Transactional
 @Slf4j
 public class UserServiceImpl implements UserService, UserDetailsService {
+
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
+
     private final PasswordEncoder passwordEncoder;
+
     @Override
     public User saveUser(User user) {
         log.info("Saving new user {} to DB", user.getName());
@@ -51,15 +57,35 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User getUser(String userName) {
+    public UserDTO getUser(String userName) {
         log.info("Fetching user{} ", userName);
-        return userRepo.findByUserName(userName);
+        return UserMapper.toDTO(userRepo.findByUserName(userName));
     }
 
     @Override
-    public List<User> getUsers() {
+    public List<UserDTO> getUsers() {
         log.info("Fetching all users");
-        return userRepo.findAll();
+        return userRepo.findAll().stream().map(UserMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDTO> findUserByLocation (String location){
+        log.info("Fetching users by location{} ", location);
+        Location location1 = Location.valueOf(location.toUpperCase());
+        return userRepo.findByLocation(location1).stream().map(UserMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDTO> moreThanAge(int age){
+        log.info("Fetching users older than {} ", age);
+        return userRepo.findAll().stream().filter(user -> user.getAge() > age ).map(UserMapper::toDTO).collect(Collectors.toList());
+        //userRepo.findAll().stream().filter(user -> user.getAge() > age ).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDTO deleteUser(String userName) {
+        log.info("Change isDeleted user{} with true", userName);
+        return UserMapper.toDTO(userRepo.delete(userName));
     }
 
     @Override
@@ -77,17 +103,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), authorities);
     }
 
-    @Override
-    public List<User> findUserByLocation (String location){
-        Location location1 = Location.valueOf(location.toUpperCase());
-        List<User> users = userRepo.findByLocation(location1);
-        return users;
-    }
 
-    @Override
-    public List<User> moreThanAge(int age){
-        return userRepo.findAll().stream().filter(user -> user.getAge() > age ).collect(Collectors.toList());
-    }
 
 
 }

@@ -22,6 +22,8 @@ public class User {
     private int age;
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
 
 }

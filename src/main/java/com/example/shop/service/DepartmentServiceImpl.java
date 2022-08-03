@@ -40,6 +40,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public List<Department> getAllDepartmets() {
         return departmentRepo.findAll();
     }
+
     @Override
     public void addUserToDepartment(String userName, String departmentName) {
         log.info("Adding user {} to department {} ", userName, departmentName);
@@ -48,6 +49,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.getUsers().add(user);
 
     }
+
     @Override
     public List<Department> moreTnanUsersInDepariment(int number) {
 
