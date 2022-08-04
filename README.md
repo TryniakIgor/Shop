@@ -28,7 +28,7 @@ $ docker build
 $ docker run 
 
 Endpoint database
-library1.czzxjzvvbj6t.us-east-2.rds.amazonaws.com
+database2.czzxjzvvbj6t.us-east-2.rds.amazonaws.com
 
 Browser URL
 Open your browser at the following URL for Swagger UI (giving REST interface details):
