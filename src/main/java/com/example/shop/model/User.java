@@ -11,12 +11,13 @@ import java.util.Collection;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "name")})
+@Table(name = "users", uniqueConstraints = @UniqueConstraint (name = "user_name_uniq", columnNames = "name"))
 public class User {
 @Id
 @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
+    @Column(name = "user_name", nullable = false, columnDefinition = "TEXT")
     private String userName;
     private String password;
     private int age;

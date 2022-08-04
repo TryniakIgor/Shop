@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -49,8 +50,13 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getUser(userName));
     }
 
-    @PostMapping("/user/save")
-    public ResponseEntity<User> saveUsers(@RequestBody User user) {
+    @PutMapping("user/{userName}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable String userName, @RequestBody User user) {
+        return ResponseEntity.ok().body(userService.updateUser(userName, user));
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<UserDTO> saveUsers(@RequestBody User user) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
@@ -77,10 +83,9 @@ public class UserController {
         return ResponseEntity.ok().body(userService.moreThanAge(age));
     }
 
-    @GetMapping("user/{userName}")
-    public ResponseEntity<UserDTO> deleteByName(@PathVariable String userName) {
-        return ResponseEntity.ok().body(userService.deleteUser(userName));
-    }
+    @DeleteMapping("user/{userName}")
+    public void deleteByName(@PathVariable String userName) {
+        userService.deleteUser(userName);    }
 
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -16,7 +16,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,10 +37,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User saveUser(User user) {
+    public UserDTO saveUser(User user) {
         log.info("Saving new user {} to DB", user.getName());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepo.save(user);
+        return UserMapper.toDTO(userRepo.save(user));
     }
 
     @Override
@@ -58,7 +60,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDTO getUser(String userName) {
-        log.info("Fetching user{} ", userName);
+        log.info("Fetching user {}", userName);
         return UserMapper.toDTO(userRepo.findByUserName(userName));
     }
 
@@ -79,13 +81,31 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public List<UserDTO> moreThanAge(int age){
         log.info("Fetching users older than {} ", age);
         return userRepo.findAll().stream().filter(user -> user.getAge() > age ).map(UserMapper::toDTO).collect(Collectors.toList());
-        //userRepo.findAll().stream().filter(user -> user.getAge() > age ).collect(Collectors.toList());
     }
 
     @Override
-    public UserDTO deleteUser(String userName) {
-        log.info("Change isDeleted user{} with true", userName);
-        return UserMapper.toDTO(userRepo.delete(userName));
+    public UserDTO updateUser(String userName, User user) {
+        log.info("Update user {} ", userName);
+
+        for (int i = 0; i<getUsers().size(); i++){
+            User user1 = userRepo.findAll().get(i);
+            if (user1.getUserName().equals(userName)){
+                user.setId(user1.getId());
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                userRepo.deleteByName(userName);
+                userRepo.save(user);
+            }
+            else throw new EntityNotFoundException("User with  user name "+ userName + " doesn't exist");
+
+        }
+
+        return UserMapper.toDTO(user);
+    }
+
+    @Override
+    public void deleteUser(String userName) {
+        log.info("Change isDeleted user {} with true", userName);
+        userRepo.markAsDeleted(userName);
     }
 
     @Override
@@ -102,8 +122,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(user.getUserName(), user.getPassword(), authorities);
     }
-
-
-
 
 }

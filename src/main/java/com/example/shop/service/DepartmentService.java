@@ -1,16 +1,18 @@
 package com.example.shop.service;
 
+import com.example.shop.dto.DepartmentDTO;
 import com.example.shop.dto.UserDTO;
 import com.example.shop.model.Department;
-import com.example.shop.model.User;
 
 import java.util.List;
 
 public interface DepartmentService {
-    Department save (Department department);
-    Department getDepartment(String name);
-    List<Department> getAllDepartmets();
-    List<User> getAllUser(String departmentName);
-    List<Department> moreTnanUsersInDepariment(int number);
+    DepartmentDTO save (Department department);
+    DepartmentDTO getDepartment(String name);
+    List<DepartmentDTO> getAllDepartmets();
+    List<UserDTO> getAllUser(String departmentName);
+    List<DepartmentDTO> moreTnanUsersInDepariment(int number);
+    DepartmentDTO updateDepartment(String name, Department department);
+    void deleteDepartment(String name);
     void addUserToDepartment(String userName, String departmentName);
 }
