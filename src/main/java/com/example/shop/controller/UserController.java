@@ -4,15 +4,17 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.shop.dto.UserDTO;
 import com.example.shop.model.Role;
 import com.example.shop.model.User;
+import com.example.shop.repository.UserRepo;
 import com.example.shop.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -20,10 +22,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.stream;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -31,16 +35,28 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
     private final UserService userService;
+    private final UserRepo userRepo;
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<UserDTO>> getUsers() {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
-    @PostMapping("/user/save")
-    public ResponseEntity<User> saveUsers(@RequestBody User user) {
+    @GetMapping("user/{userName}")
+    public ResponseEntity<UserDTO> findByName(@PathVariable String userName) {
+        return ResponseEntity.ok().body(userService.getUser(userName));
+    }
+
+    @PutMapping("user/{userName}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable String userName, @RequestBody User user) {
+        return ResponseEntity.ok().body(userService.updateUser(userName, user));
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<UserDTO> saveUsers(@RequestBody User user) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/user/save").toUriString());
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
@@ -57,17 +73,31 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/usersByLocation/{location}")
+    public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable String location) {
+        return ResponseEntity.ok().body(userService.findUserByLocation(location));
+    }
+
+    @GetMapping("/moreThanAge/{age}")
+    public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable int age) {
+        return ResponseEntity.ok().body(userService.moreThanAge(age));
+    }
+
+    @DeleteMapping("user/{userName}")
+    public void deleteByName(@PathVariable String userName) {
+        userService.deleteUser(userName);    }
+
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
-        if(authorizationHeader !=null && authorizationHeader.startsWith("Bearer ")){
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {
                 String refresh_token = authorizationHeader.substring("Bearer ".length());
                 Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String userName = decodedJWT.getSubject();
-                User user = userService.getUser(userName);
+                User user = userRepo.findByUserName(userName);
                 String access_token = JWT.create()
                         .withSubject(user.getUserName())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 20 * 60 * 1000))
@@ -81,8 +111,7 @@ public class UserController {
                 response.setContentType(APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), tokens);
 
-            }
-            catch (Exception exception){
+            } catch (Exception exception) {
                 response.setHeader("error", exception.getMessage());
                 response.setStatus(FORBIDDEN.value());
                 //response.sendError(FORBIDDEN.value());
@@ -90,18 +119,16 @@ public class UserController {
                 error.put("error_mesage", exception.getMessage());
                 response.setContentType(APPLICATION_JSON_VALUE);
                 new ObjectMapper().writeValue(response.getOutputStream(), error);
-
             }
 
-        }
-        else {
-            throw new  RuntimeException("Refresh token is missing");
+        } else {
+            throw new RuntimeException("Refresh token is missing");
         }
     }
 }
 
 @Data
-class RoleToUserForm{
+class RoleToUserForm {
     private String userName;
     private String roleName;
 }

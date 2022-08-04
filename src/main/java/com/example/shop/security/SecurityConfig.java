@@ -16,8 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
@@ -37,9 +36,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        customAuthenticationFilter.setFilterProcessesUrl("/api/login");
        http.csrf().disable();
        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-       http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh**").permitAll();
-       http.authorizeRequests().antMatchers(GET, "/api/user/**").hasAnyAuthority("SELLER");
+       http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh**", "/v3/api-docs/**","/swagger-resources/**","/swagger.json","/swagger-ui/**").permitAll();
+       http.authorizeRequests().antMatchers(GET, "/api/user/**").authenticated();
+       http.authorizeRequests().antMatchers(PUT, "/api/user/**").hasAnyAuthority("ADMIN");
+       http.authorizeRequests().antMatchers(DELETE, "/api/user/**").hasAnyAuthority("ADMIN","MANAGER");
        http.authorizeRequests().antMatchers(POST, "/api/user/save/**").hasAnyAuthority("ADMIN");
+       http.authorizeRequests().antMatchers(GET, "/api/department/users/**").authenticated();
+       http.authorizeRequests().antMatchers(GET, "/api/departments/**").authenticated();
+       http.authorizeRequests().antMatchers(POST, "/department/**").hasAnyAuthority("ADMIN");
+       http.authorizeRequests().antMatchers(PUT, "/department/**").hasAnyAuthority("ADMIN");
+       http.authorizeRequests().antMatchers(DELETE, "/department/**").hasAnyAuthority("ADMIN");
        http.authorizeRequests().anyRequest().authenticated();
        http.addFilter(customAuthenticationFilter);
        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -50,4 +56,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception{
         return super.authenticationManager();
     }
+
 }
