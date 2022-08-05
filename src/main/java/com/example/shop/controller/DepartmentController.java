@@ -48,6 +48,9 @@ public class DepartmentController {
         departmentService.deleteDepartment(name);
     }
 
+    /**
+     *This method returns departments where number of users is greater than @param numberUsersInDepartment
+     */
     @GetMapping("/departments/{numberUsersInDepartment}")
     public ResponseEntity<List<DepartmentDTO>> moreTnanUsersInDepariment(@PathVariable int numberUsersInDepartment) {
         return ResponseEntity.ok().body(departmentService.moreTnanUsersInDepariment(numberUsersInDepartment));
