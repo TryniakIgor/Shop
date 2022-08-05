@@ -1,6 +1,7 @@
 package com.example.shop.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.Collection;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "users", uniqueConstraints = @UniqueConstraint (name = "user_name_uniq", columnNames = "name"))
 public class User {
 @Id

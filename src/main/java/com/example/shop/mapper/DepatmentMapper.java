@@ -11,7 +11,6 @@ public class DepatmentMapper {
                 .id(department.getId())
                 .name(department.getName())
                 .location(department.getLocation())
-                .usersDTO(department.getUsers().stream().map(UserMapper::toDTO).collect(Collectors.toList()))
                 .build();
     }
 }
