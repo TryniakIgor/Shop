@@ -10,7 +10,6 @@ public class UserMapper {
                 .name(user.getName())
                 .age(user.getAge())
                 .userName(user.getUserName())
-                .roles(user.getRoles())
                 .build();
     }
 //    public static User toEntity(UserDTO userDTO){
