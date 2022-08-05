@@ -10,6 +10,7 @@ public interface UserService {
     UserDTO saveUser(User user);
     Role saveRole(Role role);
     void addRoleToUser(String userName, String roleName);
+    void addUserToDepartment(String userName, String departmentName);
     UserDTO getUser(String userName);
     void deleteUser(String userName);
     UserDTO updateUser(String userName, User user);

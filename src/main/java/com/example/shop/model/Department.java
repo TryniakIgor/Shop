@@ -9,6 +9,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.persistence.GenerationType.*;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -17,7 +19,8 @@ import java.util.List;
 @Table(name = "departments", uniqueConstraints = @UniqueConstraint(name = "department_name_uniq", columnNames = "name"))
 public class Department {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "department_sequence", sequenceName = "department_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = SEQUENCE, generator = "department_sequence")
     private Long id;
     @Column(nullable = false)
     private String name;

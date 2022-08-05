@@ -49,7 +49,7 @@ public class DepartmentController {
     }
 
     /**
-     *This method returns departments where number of users is greater than @param numberUsersInDepartment
+     * return departments where number of users is greater than @param numberUsersInDepartment
      */
     @GetMapping("/departments/{numberUsersInDepartment}")
     public ResponseEntity<List<DepartmentDTO>> moreTnanUsersInDepariment(@PathVariable int numberUsersInDepartment) {

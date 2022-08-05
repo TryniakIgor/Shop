@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +23,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     DepartmentRepo departmentRepo;
     @Autowired
     UserRepo userRepo;
+
     @Override
     public DepartmentDTO save(Department department) {
         log.info("Saving new department {} to DB", department.getName());
@@ -53,27 +53,25 @@ public class DepartmentServiceImpl implements DepartmentService {
         User user = userRepo.findByUserName(userName);
         Department department = departmentRepo.findByDepartmentName(departmentName);
         department.getUsers().add(user);
-
     }
 
     @Override
     public List<DepartmentDTO> moreTnanUsersInDepariment(int number) {
 
-        return  departmentRepo.findAll().stream().filter(department ->department.getUsers().size()>number).map(DepatmentMapper::toDTO).collect(Collectors.toList());
+        return departmentRepo.findAll().stream().filter(department -> department.getUsers().size() > number).map(DepatmentMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public DepartmentDTO updateDepartment(String name, Department department) {
         log.info("Update department {} ", name);
 
-        for (int i = 0; i < getAllDepartmets().size(); i++){
+        for (int i = 0; i < getAllDepartmets().size(); i++) {
             Department department1 = departmentRepo.findAll().get(i);
-            if (department1.getName().equals(name)){
+            if (department1.getName().equals(name)) {
                 department.setId(department1.getId());
                 departmentRepo.deleteByName(name);
                 departmentRepo.save(department);
-            }
-            else throw new EntityNotFoundException("Department "+ name + " doesn't exist");
+            } else throw new EntityNotFoundException("Department " + name + " doesn't exist");
 
         }
 
