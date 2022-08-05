@@ -61,11 +61,14 @@ public class UserController {
         return ResponseEntity.created(uri).body(userService.saveUser(user));
     }
 
-    @PostMapping("/role/save")
+    @PostMapping("/role")
     public ResponseEntity<Role> saveRoles(@RequestBody Role role) {
         return ResponseEntity.ok().body(userService.saveRole(role));
     }
 
+    @DeleteMapping("user/{userName}")
+    public void deleteByName(@PathVariable String userName) {
+        userService.deleteUser(userName);    }
 
     @PostMapping("/role/addToUser")
     public ResponseEntity<Role> addRoleToUser(@RequestBody RoleToUserForm form) {
@@ -73,19 +76,22 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+    *This method returns all users who work in departments of the entered location
+     *@param location  location of department
+     */
     @GetMapping("/usersByLocation/{location}")
     public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable String location) {
         return ResponseEntity.ok().body(userService.findUserByLocation(location));
     }
 
+    /**
+     *This method returns all users who are older than @param age
+     */
     @GetMapping("/moreThanAge/{age}")
     public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable int age) {
         return ResponseEntity.ok().body(userService.moreThanAge(age));
     }
-
-    @DeleteMapping("user/{userName}")
-    public void deleteByName(@PathVariable String userName) {
-        userService.deleteUser(userName);    }
 
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
