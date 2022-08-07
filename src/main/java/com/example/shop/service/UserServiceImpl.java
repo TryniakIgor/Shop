@@ -2,14 +2,17 @@ package com.example.shop.service;
 
 import com.example.shop.dto.UserDTO;
 import com.example.shop.mapper.UserMapper;
+import com.example.shop.model.Department;
 import com.example.shop.model.Location;
 import com.example.shop.model.Role;
 import com.example.shop.model.User;
+import com.example.shop.repository.DepartmentRepo;
 import com.example.shop.repository.RoleRepo;
 import com.example.shop.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,6 +36,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
+    private final DepartmentRepo departmentRepo;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -55,13 +59,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepo.findByUserName(userName);
         Role role = roleRepo.findByName(roleName);
         user.getRoles().add(role);
+    }
 
+    public void addUserToDepartment(String userName, String departmentName) {
+        log.info("Adding user {} to department {} ", userName, departmentName);
+        User user = userRepo.findByUserName(userName);
+        Department department = departmentRepo.findByDepartmentName(departmentName);
+        department.getUsers().add(user);
     }
 
     @Override
     public UserDTO getUser(String userName) {
         log.info("Fetching user {}", userName);
-        return UserMapper.toDTO(userRepo.findByUserName(userName));
+        User user = userRepo.findByUserName(userName);
+        if (user == null) {
+            throw new DataRetrievalFailureException("Answer with name " + userName + ", not found.");
+        }
+        return UserMapper.toDTO(user);
     }
 
     @Override

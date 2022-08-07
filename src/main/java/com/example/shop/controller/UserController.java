@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -76,9 +75,14 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/user/addToDepartment")
+    public ResponseEntity<Role> addUserToDepartment(@RequestBody UserToDepartmentForm form) {
+        userService.addUserToDepartment(form.getUserName(), form.getDepartmentName());
+        return ResponseEntity.ok().build();
+    }
+
     /**
-    *This method returns all users who work in departments of the entered location
-     *@param location  location of department
+    * return all users who work in departments of the @param location
      */
     @GetMapping("/usersByLocation/{location}")
     public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable String location) {
@@ -86,7 +90,7 @@ public class UserController {
     }
 
     /**
-     *This method returns all users who are older than @param age
+     * return all users who are older than @param age
      */
     @GetMapping("/moreThanAge/{age}")
     public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable int age) {
@@ -137,5 +141,11 @@ public class UserController {
 class RoleToUserForm {
     private String userName;
     private String roleName;
+}
+
+@Data
+class UserToDepartmentForm {
+    private String userName;
+    private String departmentName;
 }
 
