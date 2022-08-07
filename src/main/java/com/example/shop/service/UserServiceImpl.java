@@ -12,6 +12,7 @@ import com.example.shop.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -70,7 +71,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDTO getUser(String userName) {
         log.info("Fetching user {}", userName);
-        return UserMapper.toDTO(userRepo.findByUserName(userName));
+        User user = userRepo.findByUserName(userName);
+        if (user == null) {
+            throw new DataRetrievalFailureException("Answer with name " + userName + ", not found.");
+        }
+        return UserMapper.toDTO(user);
     }
 
     @Override

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +64,17 @@ class UserServiceImplTest {
 
         assertEquals(actualUser, UserMapper.toDTO(expectedUser));
     }
+
+//    @Test
+//    void saveUser() {
+//        when(userRepo.save(any(User.class))).thenReturn(expectedUser);
+//
+//        userService.saveUser(expectedUser);
+//
+//        assertNotNull(expectedUserDTO);
+//        assertEquals("Luk", expectedUser.getName());
+//        assertEquals(22, expectedUser.getAge());
+//    }
 
     @Test
     void getUsers() {
