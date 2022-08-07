@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -29,6 +30,8 @@ class UserServiceImplTest {
 
     @Mock
     private UserRepo userRepo;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     private User expectedUser;
     private UserDTO expectedUserDTO;
@@ -65,16 +68,16 @@ class UserServiceImplTest {
         assertEquals(actualUser, UserMapper.toDTO(expectedUser));
     }
 
-//    @Test
-//    void saveUser() {
-//        when(userRepo.save(any(User.class))).thenReturn(expectedUser);
-//
-//        userService.saveUser(expectedUser);
-//
-//        assertNotNull(expectedUserDTO);
-//        assertEquals("Luk", expectedUser.getName());
-//        assertEquals(22, expectedUser.getAge());
-//    }
+    @Test
+    void saveUser() {
+        when(userRepo.save(any(User.class))).thenReturn(expectedUser);
+
+        userService.saveUser(expectedUser);
+
+        assertNotNull(expectedUserDTO);
+        assertEquals("Luk", expectedUser.getName());
+        assertEquals(22, expectedUser.getAge());
+    }
 
     @Test
     void getUsers() {

@@ -1,6 +1,7 @@
 package com.example.shop.service;
 
 import com.example.shop.dto.UserDTO;
+import com.example.shop.exeption.ResourseNotFoundExeption;
 import com.example.shop.mapper.UserMapper;
 import com.example.shop.model.Department;
 import com.example.shop.model.Location;
@@ -72,10 +73,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDTO getUser(String userName) {
         log.info("Fetching user {}", userName);
         User user = userRepo.findByUserName(userName);
-        if (user == null) {
-            throw new DataRetrievalFailureException("Answer with name " + userName + ", not found.");
-        }
-        return UserMapper.toDTO(user);
+        if (user != null)
+            return UserMapper.toDTO(user);
+
+         else throw new ResourseNotFoundExeption("User", userName);
+
     }
 
     @Override
