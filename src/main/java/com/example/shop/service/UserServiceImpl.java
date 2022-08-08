@@ -12,21 +12,18 @@ import com.example.shop.repository.RoleRepo;
 import com.example.shop.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,9 +72,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepo.findByUserName(userName);
         if (user != null)
             return UserMapper.toDTO(user);
-
-         else throw new ResourseNotFoundExeption("User", userName);
-
+        else throw new ResourseNotFoundExeption("User", userName);
     }
 
     @Override
@@ -87,40 +82,47 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<UserDTO> findUserByLocation (String location){
+    public List<UserDTO> findUserByLocation(String location) {
         log.info("Fetching users by location{} ", location);
         Location location1 = Location.valueOf(location.toUpperCase());
+        String isPresent = null;
+        for (Location loc : Location.values()) {
+            if (loc.toString().equals(location.toUpperCase())) {
+                isPresent = loc.toString();
+                break;
+            }
+        }
+        Optional.ofNullable(isPresent).orElseThrow(() -> new ResourseNotFoundExeption("Location", location));
         return userRepo.findByLocation(location1).stream().map(UserMapper::toDTO).collect(Collectors.toList());
+
     }
 
     @Override
-    public List<UserDTO> moreThanAge(int age){
+    public List<UserDTO> moreThanAge(int age) {
         log.info("Fetching users older than {} ", age);
-        return userRepo.findAll().stream().filter(user -> user.getAge() > age ).map(UserMapper::toDTO).collect(Collectors.toList());
+        return userRepo.findAll().stream().filter(user -> user.getAge() > age).map(UserMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public UserDTO updateUser(String userName, User user) {
         log.info("Update user {} ", userName);
 
-        for (int i = 0; i<getUsers().size(); i++){
+        for (int i = 0; i < getUsers().size(); i++) {
             User user1 = userRepo.findAll().get(i);
-            if (user1.getUserName().equals(userName)){
+            if (user1.getUserName().equals(userName)) {
                 user.setId(user1.getId());
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
                 userRepo.deleteByName(userName);
                 userRepo.save(user);
-            }
-            else throw new EntityNotFoundException("User with  user name "+ userName + " doesn't exist");
-
+            } else throw new ResourseNotFoundExeption("User", userName);
         }
-
         return UserMapper.toDTO(user);
     }
 
     @Override
     public void deleteUser(String userName) {
         log.info("Change isDeleted user {} with true", userName);
+        Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(()-> new ResourseNotFoundExeption("User", userName));
         userRepo.markAsDeleted(userName);
     }
 

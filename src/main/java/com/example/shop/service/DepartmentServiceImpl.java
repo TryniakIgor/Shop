@@ -2,6 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.dto.DepartmentDTO;
 import com.example.shop.dto.UserDTO;
+import com.example.shop.exeption.ResourseNotFoundExeption;
 import com.example.shop.mapper.DepatmentMapper;
 import com.example.shop.mapper.UserMapper;
 import com.example.shop.model.Department;
@@ -12,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,13 +33,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public DepartmentDTO getDepartment(String name) {
-
-        return DepatmentMapper.toDTO(departmentRepo.findByDepartmentName(name));
+        return DepatmentMapper.toDTO(Optional.ofNullable(departmentRepo.findByDepartmentName(name)).orElseThrow(() -> new ResourseNotFoundExeption("Department", name)));
     }
 
     @Override
     public List<UserDTO> getAllUser(String departmentName) {
-        Department department = departmentRepo.findByDepartmentName(departmentName);
+        Department department = Optional.ofNullable(departmentRepo.findByDepartmentName(departmentName)).orElseThrow(() -> new ResourseNotFoundExeption("Department", departmentName));
         return department.getUsers().stream().map(UserMapper::toDTO).collect(Collectors.toList());
     }
 
@@ -50,8 +50,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void addUserToDepartment(String userName, String departmentName) {
         log.info("Adding user {} to department {} ", userName, departmentName);
-        User user = userRepo.findByUserName(userName);
-        Department department = departmentRepo.findByDepartmentName(departmentName);
+        User user = Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
+        Department department = Optional.ofNullable(departmentRepo.findByDepartmentName(departmentName)).orElseThrow(() -> new ResourseNotFoundExeption("Department", departmentName));
         department.getUsers().add(user);
     }
 
@@ -71,7 +71,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 department.setId(department1.getId());
                 departmentRepo.deleteByName(name);
                 departmentRepo.save(department);
-            } else throw new EntityNotFoundException("Department " + name + " doesn't exist");
+            } else throw new ResourseNotFoundExeption("Department", name);
 
         }
 
@@ -81,6 +81,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void deleteDepartment(String name) {
         log.info("Change isDeleted department {} with true", name);
+        Optional.ofNullable(departmentRepo.findByDepartmentName(name)).orElseThrow(()-> new ResourseNotFoundExeption("Department", name));
         departmentRepo.markAsDeleted(name);
     }
 }
