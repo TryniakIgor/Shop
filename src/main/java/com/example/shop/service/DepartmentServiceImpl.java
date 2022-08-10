@@ -2,6 +2,7 @@ package com.example.shop.service;
 
 import com.example.shop.dto.DepartmentDTO;
 import com.example.shop.dto.UserDTO;
+import com.example.shop.exeption.EntityAlreadyExist;
 import com.example.shop.exeption.ResourseNotFoundExeption;
 import com.example.shop.mapper.DepatmentMapper;
 import com.example.shop.mapper.UserMapper;
@@ -13,11 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @Slf4j
 public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
@@ -28,7 +31,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentDTO save(Department department) {
         log.info("Saving new department {} to DB", department.getName());
+
+        Optional<Department> existingUser = Optional.ofNullable(departmentRepo.findByDepartmentName(department.getName()));
+        existingUser.ifPresentOrElse(
+                (value) -> {
+                    throw new EntityAlreadyExist("Department", department.getName());
+                }, () -> departmentRepo.save(department)
+        );
         return DepatmentMapper.toDTO(departmentRepo.save(department));
+
     }
 
     @Override
@@ -37,7 +48,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    public List<UserDTO> getAllUser(String departmentName) {
+    public List<UserDTO> getAllUserInDepartment(String departmentName) {
         Department department = Optional.ofNullable(departmentRepo.findByDepartmentName(departmentName)).orElseThrow(() -> new ResourseNotFoundExeption("Department", departmentName));
         return department.getUsers().stream().map(UserMapper::toDTO).collect(Collectors.toList());
     }
@@ -58,30 +69,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<DepartmentDTO> moreTnanUsersInDepariment(int number) {
 
-        return departmentRepo.findAll().stream().filter(department -> department.getUsers().size() > number).map(DepatmentMapper::toDTO).collect(Collectors.toList());
+        return getAllDepartmets().stream().filter(departmentDTO -> departmentDTO.getUsersDTO().size() > number).collect(Collectors.toList());
     }
 
     @Override
     public DepartmentDTO updateDepartment(String name, Department department) {
         log.info("Update department {} ", name);
+        Department oldDepartment = Optional.ofNullable(departmentRepo.findByDepartmentName(name)).orElseThrow(() -> new ResourseNotFoundExeption("Department", name));
+        oldDepartment.setId(department.getId());
+        oldDepartment.setLocation(department.getLocation());
+        oldDepartment.setUsers(department.getUsers());
 
-        for (int i = 0; i < getAllDepartmets().size(); i++) {
-            Department department1 = departmentRepo.findAll().get(i);
-            if (department1.getName().equals(name)) {
-                department.setId(department1.getId());
-                departmentRepo.deleteByName(name);
-                departmentRepo.save(department);
-            } else throw new ResourseNotFoundExeption("Department", name);
-
-        }
-
-        return DepatmentMapper.toDTO(department);
+        return DepatmentMapper.toDTO(oldDepartment);
     }
 
     @Override
     public void deleteDepartment(String name) {
         log.info("Change isDeleted department {} with true", name);
-        Optional.ofNullable(departmentRepo.findByDepartmentName(name)).orElseThrow(()-> new ResourseNotFoundExeption("Department", name));
+        Optional.ofNullable(departmentRepo.findByDepartmentName(name)).orElseThrow(() -> new ResourseNotFoundExeption("Department", name));
         departmentRepo.markAsDeleted(name);
     }
 }

@@ -12,13 +12,5 @@ public class UserMapper {
                 .userName(user.getUserName())
                 .build();
     }
-//    public static User toEntity(UserDTO userDTO){
-//        return User.builder()
-//                .id(userDTO.getId())
-//                .name(userDTO.getName())
-//                .age(userDTO.getAge())
-//                .userName(userDTO.getUserName())
-//                .roles(userDTO.getRoles())
-//                .build();
-//    }
+
 }

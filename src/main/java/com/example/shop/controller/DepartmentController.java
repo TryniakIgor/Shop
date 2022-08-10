@@ -5,6 +5,7 @@ import com.example.shop.dto.UserDTO;
 import com.example.shop.model.Department;
 import com.example.shop.service.DepartmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +25,8 @@ public class DepartmentController {
     }
 
     @GetMapping("/department/users/{nameDepartment}")
-    public ResponseEntity<List<UserDTO>> getUsers(@PathVariable String nameDepartment) {
-        return ResponseEntity.ok().body(departmentService.getAllUser(nameDepartment));
+    public ResponseEntity<List<UserDTO>> getAllUserInDepartment(@PathVariable String nameDepartment) {
+        return ResponseEntity.ok().body(departmentService.getAllUserInDepartment(nameDepartment));
     }
 
     @PostMapping("/department")
@@ -48,6 +49,12 @@ public class DepartmentController {
         departmentService.deleteDepartment(name);
     }
 
+    @PostMapping("/department/addUserToDepartment")
+    public ResponseEntity<DepartmentDTO> addUserToDepartment(@RequestBody UserToDepartmentForm form) {
+        departmentService.addUserToDepartment(form.getUserName(), form.getDepartmentName());
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * return departments where number of users is greater than @param numberUsersInDepartment
      */
@@ -55,4 +62,10 @@ public class DepartmentController {
     public ResponseEntity<List<DepartmentDTO>> moreTnanUsersInDepariment(@PathVariable int numberUsersInDepartment) {
         return ResponseEntity.ok().body(departmentService.moreTnanUsersInDepariment(numberUsersInDepartment));
     }
+}
+
+@Data
+class UserToDepartmentForm {
+    private String userName;
+    private String departmentName;
 }

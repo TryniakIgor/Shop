@@ -15,4 +15,10 @@ public class GlobalExeptionHandler {
         ExeptionDetails exeptionDetails = new ExeptionDetails(LocalDateTime.now(), exeption.getMessage(), request.getDescription(false));
         return new  ResponseEntity(exeptionDetails, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(EntityAlreadyExist.class)
+    public ResponseEntity<?> handleEntityAlreadyExist(ResourseNotFoundExeption exeption, WebRequest request){
+        ExeptionDetails exeptionDetails = new ExeptionDetails(LocalDateTime.now(), exeption.getMessage(), request.getDescription(false));
+        return new  ResponseEntity(exeptionDetails, HttpStatus.CONFLICT);
+    }
 }

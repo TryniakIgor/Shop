@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.GenerationType.SEQUENCE;
 
 @Entity
 @Data
@@ -27,7 +25,7 @@ public class Department {
     @Enumerated(EnumType.STRING)
     private Location location;
     @OneToMany(fetch = FetchType.EAGER)
-    private List<User> users = new ArrayList<>();
+    private List<User> users;
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
