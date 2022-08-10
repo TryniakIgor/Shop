@@ -4,7 +4,9 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.shop.dto.DepartmentDTO;
 import com.example.shop.dto.UserDTO;
+import com.example.shop.mapper.UserMapper;
 import com.example.shop.model.Role;
 import com.example.shop.model.User;
 import com.example.shop.repository.UserRepo;
@@ -13,6 +15,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -32,13 +40,26 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
+@Slf4j
 public class UserController {
     private final UserService userService;
     private final UserRepo userRepo;
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserDTO>> getUsers() {
-        return ResponseEntity.ok().body(userService.getUsers());
+    public ResponseEntity<Map<String, Object>> getUsers(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "3") int size) {
+        Pageable paging = PageRequest.of(page, size);
+        Page<User> pageTuts = userRepo.findAll(paging);
+        List<User> users = pageTuts.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("users", userService.getUsers(paging));
+        response.put("currentPage", pageTuts.getNumber());
+        response.put("totalItems", pageTuts.getTotalElements());
+        response.put("totalPages", pageTuts.getTotalPages());
+        log.info("lll " + response.size());
+
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("user/{userName}")
@@ -64,7 +85,8 @@ public class UserController {
 
     @DeleteMapping("user/{userName}")
     public void deleteByName(@PathVariable String userName) {
-        userService.deleteUser(userName);    }
+        userService.deleteUser(userName);
+    }
 
     @PostMapping("/role/addToUser")
     public ResponseEntity<Role> addRoleToUser(@RequestBody RoleToUserForm form) {
@@ -72,14 +94,9 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/user/addToDepartment")
-    public ResponseEntity<Role> addUserToDepartment(@RequestBody UserToDepartmentForm form) {
-        userService.addUserToDepartment(form.getUserName(), form.getDepartmentName());
-        return ResponseEntity.ok().build();
-    }
 
     /**
-    * return all users who work in departments of the @param location
+     * return all users who work in departments of the @param location
      */
     @GetMapping("/usersByLocation/{location}")
     public ResponseEntity<List<UserDTO>> getUsersByLocation(@PathVariable String location) {
@@ -140,9 +157,5 @@ class RoleToUserForm {
     private String roleName;
 }
 
-@Data
-class UserToDepartmentForm {
-    private String userName;
-    private String departmentName;
-}
+
 

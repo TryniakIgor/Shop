@@ -1,17 +1,18 @@
 package com.example.shop.service;
 
 import com.example.shop.dto.UserDTO;
+import com.example.shop.exeption.EntityAlreadyExist;
 import com.example.shop.exeption.ResourseNotFoundExeption;
 import com.example.shop.mapper.UserMapper;
-import com.example.shop.model.Department;
 import com.example.shop.model.Location;
 import com.example.shop.model.Role;
 import com.example.shop.model.User;
-import com.example.shop.repository.DepartmentRepo;
 import com.example.shop.repository.RoleRepo;
 import com.example.shop.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -34,13 +35,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
-    private final DepartmentRepo departmentRepo;
-
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDTO saveUser(User user) {
         log.info("Saving new user {} to DB", user.getName());
+
+        Optional<User> existingUser = Optional.ofNullable(userRepo.findByUserName(user.getUserName()));
+        existingUser.ifPresentOrElse(
+                (value) -> {
+                    throw new EntityAlreadyExist("User", user.getName());
+                }, () -> userRepo.save(user)
+        );
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return UserMapper.toDTO(userRepo.save(user));
     }
@@ -48,23 +54,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public Role saveRole(Role role) {
         log.info("Saving new role {} to DB", role.getName());
+
         return roleRepo.save(role);
     }
 
     @Override
     public void addRoleToUser(String userName, String roleName) {
         log.info("Adding role {} to user {} ", roleName, userName);
-        User user = userRepo.findByUserName(userName);
-        Role role = roleRepo.findByName(roleName);
+        User user = Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
+        Role role = Optional.ofNullable(roleRepo.findByName(roleName)).orElseThrow(() -> new ResourseNotFoundExeption("Role", roleName));
         user.getRoles().add(role);
     }
 
-    public void addUserToDepartment(String userName, String departmentName) {
-        log.info("Adding user {} to department {} ", userName, departmentName);
-        User user = userRepo.findByUserName(userName);
-        Department department = departmentRepo.findByDepartmentName(departmentName);
-        department.getUsers().add(user);
-    }
 
     @Override
     public UserDTO getUser(String userName) {
@@ -76,9 +77,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<UserDTO> getUsers() {
+    public List<UserDTO> getUsers(Pageable pageable) {
         log.info("Fetching all users");
-        return userRepo.findAll().stream().map(UserMapper::toDTO).collect(Collectors.toList());
+        return userRepo.findAll(pageable).stream().map(UserMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
@@ -94,35 +95,31 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         Optional.ofNullable(isPresent).orElseThrow(() -> new ResourseNotFoundExeption("Location", location));
         return userRepo.findByLocation(location1).stream().map(UserMapper::toDTO).collect(Collectors.toList());
-
     }
 
     @Override
     public List<UserDTO> moreThanAge(int age) {
         log.info("Fetching users older than {} ", age);
-        return userRepo.findAll().stream().filter(user -> user.getAge() > age).map(UserMapper::toDTO).collect(Collectors.toList());
+        return userRepo.findAll(PageRequest.of(0, 10)).stream().filter(user -> user.getAge() > age).map(UserMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public UserDTO updateUser(String userName, User user) {
         log.info("Update user {} ", userName);
 
-        for (int i = 0; i < getUsers().size(); i++) {
-            User user1 = userRepo.findAll().get(i);
-            if (user1.getUserName().equals(userName)) {
-                user.setId(user1.getId());
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-                userRepo.deleteByName(userName);
-                userRepo.save(user);
-            } else throw new ResourseNotFoundExeption("User", userName);
-        }
-        return UserMapper.toDTO(user);
+        User oldUser = Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
+        oldUser.setId(user.getId());
+        oldUser.setName(user.getName());
+        oldUser.setPassword(user.getPassword());
+        oldUser.setAge(user.getAge());
+
+        return UserMapper.toDTO(oldUser);
     }
 
     @Override
     public void deleteUser(String userName) {
         log.info("Change isDeleted user {} with true", userName);
-        Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(()-> new ResourseNotFoundExeption("User", userName));
+        Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
         userRepo.markAsDeleted(userName);
     }
 

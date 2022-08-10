@@ -21,5 +21,4 @@ public interface DepartmentRepo extends JpaRepository<Department, Long> {
     @Query ("UPDATE Department d SET d.isDeleted = true WHERE d.name =:name")
     void markAsDeleted(String name);
 
-    void deleteByName(String name);
 }

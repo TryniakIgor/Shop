@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -85,9 +88,9 @@ class UserServiceImplTest {
         listExpected.add(expectedUser);
         List<UserDTO> listToDtolistExpected = listExpected.stream().map(UserMapper::toDTO).collect(Collectors.toList());
 
-        when(userRepo.findAll()).thenReturn(listExpected);
+        when(userRepo.findAll(PageRequest.of(0, 5))).thenReturn(new PageImpl<>( listExpected));
 
-        List<UserDTO> listActual = userService.getUsers();
+        List<UserDTO> listActual = userService.getUsers(PageRequest.of(0, 5));
 
         assertEquals(listActual, listToDtolistExpected);
     }
