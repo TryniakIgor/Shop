@@ -33,4 +33,4 @@ database2.czzxjzvvbj6t.us-east-2.rds.amazonaws.com
 Browser URL
 Open your browser at the following URL for Swagger UI (giving REST interface details):
 
-http://3.145.193.25:8080/swagger-ui/index.html
+http://ec2-3-145-193-25.us-east-2.compute.amazonaws.com:8081/swagger-ui/index.html
