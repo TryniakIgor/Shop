@@ -41,10 +41,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(DELETE, "/api/user/**").hasAnyAuthority("ADMIN", "MANAGER");
         http.authorizeRequests().antMatchers(POST, "/api/user/save/**").hasAnyAuthority("ADMIN");
         http.authorizeRequests().antMatchers(GET, "/api/department/users/**").authenticated();
-        http.authorizeRequests().antMatchers(GET, "/api/departments/**").authenticated();
-        http.authorizeRequests().antMatchers(POST, "/department/**").hasAnyAuthority("ADMIN");
-        http.authorizeRequests().antMatchers(PUT, "/department/**").hasAnyAuthority("ADMIN");
-        http.authorizeRequests().antMatchers(DELETE, "/department/**").hasAnyAuthority("ADMIN");
+        http.authorizeRequests().antMatchers(GET, "/api/department/**").authenticated();
+        http.authorizeRequests().antMatchers(GET, "/api/department/sales").authenticated();
+        http.authorizeRequests().antMatchers(POST, "/api/department/**").hasAnyAuthority("ADMIN");
+        http.authorizeRequests().antMatchers(PUT, "/api/department/**").hasAnyAuthority("ADMIN");
+        http.authorizeRequests().antMatchers(DELETE, "/api/department/**").hasAnyAuthority("ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

@@ -5,7 +5,6 @@ import com.example.shop.exeption.EntityAlreadyExist;
 import com.example.shop.exeption.ResourseNotFoundExeption;
 import com.example.shop.mapper.UserMapper;
 import com.example.shop.model.Location;
-import com.example.shop.model.Role;
 import com.example.shop.model.User;
 import com.example.shop.repository.RoleRepo;
 import com.example.shop.repository.UserRepo;
@@ -41,7 +40,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDTO saveUser(User user) {
         log.info("Saving new user {} to DB", user.getName());
 
-        Optional<User> existingUser = Optional.ofNullable(userRepo.findByUserName(user.getUserName()));
+        Optional<User> existingUser = Optional.ofNullable(userRepo.findByUserNameAndIsDeletedIsFalse(user.getUserName()));
         existingUser.ifPresentOrElse(
                 (value) -> {
                     throw new EntityAlreadyExist("User", user.getName());
@@ -52,25 +51,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Role saveRole(Role role) {
-        log.info("Saving new role {} to DB", role.getName());
-
-        return roleRepo.save(role);
-    }
-
-    @Override
-    public void addRoleToUser(String userName, String roleName) {
-        log.info("Adding role {} to user {} ", roleName, userName);
-        User user = Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
-        Role role = Optional.ofNullable(roleRepo.findByName(roleName)).orElseThrow(() -> new ResourseNotFoundExeption("Role", roleName));
-        user.getRoles().add(role);
-    }
-
-
-    @Override
     public UserDTO getUser(String userName) {
         log.info("Fetching user {}", userName);
-        User user = userRepo.findByUserName(userName);
+        User user = userRepo.findByUserNameAndIsDeletedIsFalse(userName);
         if (user != null)
             return UserMapper.toDTO(user);
         else throw new ResourseNotFoundExeption("User", userName);
@@ -84,7 +67,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public List<UserDTO> findUserByLocation(String location) {
-        log.info("Fetching users by location{} ", location);
+        log.info("Fetching users by location {} ", location);
         Location location1 = Location.valueOf(location.toUpperCase());
         String isPresent = null;
         for (Location loc : Location.values()) {
@@ -107,7 +90,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDTO updateUser(String userName, User user) {
         log.info("Update user {} ", userName);
 
-        User oldUser = Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
+        User oldUser = Optional.ofNullable(userRepo.findByUserNameAndIsDeletedIsFalse(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
         oldUser.setId(user.getId());
         oldUser.setName(user.getName());
         oldUser.setPassword(user.getPassword());
@@ -119,13 +102,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public void deleteUser(String userName) {
         log.info("Change isDeleted user {} with true", userName);
-        Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
+        Optional.ofNullable(userRepo.findByUserNameAndIsDeletedIsFalse(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
         userRepo.markAsDeleted(userName);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepo.findByUserName(username);
+        User user = userRepo.findByUserNameAndIsDeletedIsFalse(username);
         if (user == null) {
             log.error("User not found in DB");
             throw new UsernameNotFoundException("User not found in DB");

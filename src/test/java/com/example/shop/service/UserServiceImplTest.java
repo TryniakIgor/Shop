@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,7 +63,7 @@ class UserServiceImplTest {
         List<User> listExpected = new ArrayList<User>();
         listExpected.add(expectedUser);
 
-        when(userRepo.findByUserName("luk111")).thenReturn(expectedUser);
+        when(userRepo.findByUserNameAndIsDeletedIsFalse("luk111")).thenReturn(expectedUser);
 
         UserDTO actualUser = (userService.getUser("luk111"));
 

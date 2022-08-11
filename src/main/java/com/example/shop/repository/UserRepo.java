@@ -11,8 +11,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import java.util.List;
 
 public interface UserRepo extends PagingAndSortingRepository<User, Long> {
-    @Query("select u from User u where userName =:userName and u.isDeleted = false ")
-    User findByUserName(String userName);
+    //@Query("select u from User u where userName =:userName and u.isDeleted = false ")
+    User findByUserNameAndIsDeletedIsFalse(String userName);
 
     @Query("select u from Department d \n" +
             "left join d.users u\n" +
