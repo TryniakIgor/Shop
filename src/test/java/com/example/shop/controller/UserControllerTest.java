@@ -5,8 +5,6 @@ import com.example.shop.model.User;
 import com.example.shop.repository.UserRepo;
 import com.example.shop.service.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +30,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @WebMvcTest(value = UserController.class, useDefaultFilters = false, includeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = UserController.class)})
@@ -92,7 +89,6 @@ class UserControllerTest {
         Pageable paging = PageRequest.of(0, 3);
         when(userRepo.findAll(paging)).thenReturn((new PageImpl<>(users1)));
         Page<User> pageTuts = userRepo.findAll(paging);
-        List<User> users = pageTuts.getContent();
         Map<String, Object> response = new HashMap<>();
 
         when(response.put("users", userServiceimpl.getUsers(paging))).thenReturn(usersDTO);
@@ -101,7 +97,7 @@ class UserControllerTest {
         response.put("totalItems", pageTuts.getTotalElements());
         response.put("totalPages", pageTuts.getTotalPages());
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/users?page=0&size=3")
+        MvcResult mvcResult = mockMvc.perform(get("/api/user?page=0&size=3")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalItems", is(2) ))

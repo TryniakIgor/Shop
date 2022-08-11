@@ -5,7 +5,6 @@ import com.example.shop.dto.UserDTO;
 import com.example.shop.model.Department;
 import com.example.shop.service.DepartmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("${url}")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class DepartmentController {
     private final DepartmentService departmentService;
 
-    @GetMapping("/departments")
+    @GetMapping("/department")
     public ResponseEntity<List<DepartmentDTO>> getDepartments() {
         return ResponseEntity.ok().body(departmentService.getAllDepartmets());
     }
@@ -40,16 +39,17 @@ public class DepartmentController {
     }
 
     @PutMapping("/department/{name}")
-    public ResponseEntity<DepartmentDTO> updateUser(@PathVariable String name, @RequestBody Department department) {
+    public ResponseEntity<DepartmentDTO> updateDepartment(@PathVariable String name, @RequestBody Department department) {
         return ResponseEntity.ok().body(departmentService.updateDepartment(name, department));
     }
 
     @DeleteMapping("/department/{name}")
-    public void deleteByName(@PathVariable String name) {
+    public ResponseEntity deleteByName(@PathVariable String name) {
         departmentService.deleteDepartment(name);
+        return  ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/department/addUserToDepartment")
+    @PostMapping("/department/add_user_to_department")
     public ResponseEntity<DepartmentDTO> addUserToDepartment(@RequestBody UserToDepartmentForm form) {
         departmentService.addUserToDepartment(form.getUserName(), form.getDepartmentName());
         return ResponseEntity.ok().build();
@@ -58,14 +58,9 @@ public class DepartmentController {
     /**
      * return departments where number of users is greater than @param numberUsersInDepartment
      */
-    @GetMapping("/departments/{numberUsersInDepartment}")
+    @GetMapping("/department/number_user_in_department/{numberUsersInDepartment}")
     public ResponseEntity<List<DepartmentDTO>> moreTnanUsersInDepariment(@PathVariable int numberUsersInDepartment) {
         return ResponseEntity.ok().body(departmentService.moreTnanUsersInDepariment(numberUsersInDepartment));
     }
 }
 
-@Data
-class UserToDepartmentForm {
-    private String userName;
-    private String departmentName;
-}

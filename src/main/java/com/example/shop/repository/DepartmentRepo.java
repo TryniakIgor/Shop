@@ -13,6 +13,7 @@ public interface DepartmentRepo extends JpaRepository<Department, Long> {
     @Query("select d from Department d where d.name =:name and  d.isDeleted = false ")
     Department findByDepartmentName(String name);
 
+
     @Override
     @Query("select d from Department d where d.isDeleted = false ")
     List<Department> findAll();
@@ -20,5 +21,7 @@ public interface DepartmentRepo extends JpaRepository<Department, Long> {
     @Modifying
     @Query ("UPDATE Department d SET d.isDeleted = true WHERE d.name =:name")
     void markAsDeleted(String name);
+
+
 
 }

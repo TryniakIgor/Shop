@@ -39,36 +39,38 @@ public class DepartmentServiceImpl implements DepartmentService {
                 }, () -> departmentRepo.save(department)
         );
         return DepatmentMapper.toDTO(departmentRepo.save(department));
-
     }
 
     @Override
     public DepartmentDTO getDepartment(String name) {
+        log.info("Fetching department {}", name);
         return DepatmentMapper.toDTO(Optional.ofNullable(departmentRepo.findByDepartmentName(name)).orElseThrow(() -> new ResourseNotFoundExeption("Department", name)));
     }
 
     @Override
     public List<UserDTO> getAllUserInDepartment(String departmentName) {
+        log.info("Fetching all users in department {}", departmentName);
         Department department = Optional.ofNullable(departmentRepo.findByDepartmentName(departmentName)).orElseThrow(() -> new ResourseNotFoundExeption("Department", departmentName));
         return department.getUsers().stream().map(UserMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public List<DepartmentDTO> getAllDepartmets() {
+        log.info("Fetching all departments");
         return departmentRepo.findAll().stream().map(DepatmentMapper::toDTO).collect(Collectors.toList());
     }
 
     @Override
     public void addUserToDepartment(String userName, String departmentName) {
         log.info("Adding user {} to department {} ", userName, departmentName);
-        User user = Optional.ofNullable(userRepo.findByUserName(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
+        User user = Optional.ofNullable(userRepo.findByUserNameAndIsDeletedIsFalse(userName)).orElseThrow(() -> new ResourseNotFoundExeption("User", userName));
         Department department = Optional.ofNullable(departmentRepo.findByDepartmentName(departmentName)).orElseThrow(() -> new ResourseNotFoundExeption("Department", departmentName));
         department.getUsers().add(user);
     }
 
     @Override
     public List<DepartmentDTO> moreTnanUsersInDepariment(int number) {
-
+        log.info("Fetching departments where users are more than {}", number);
         return getAllDepartmets().stream().filter(departmentDTO -> departmentDTO.getUsersDTO().size() > number).collect(Collectors.toList());
     }
 

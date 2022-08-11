@@ -10,8 +10,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
 @AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
 class UserRepoTest {
@@ -33,7 +31,7 @@ class UserRepoTest {
     void findByUserName() {
         userRepo.save(user);
 
-        User user = userRepo.findByUserName("luk111");
+        User user = userRepo.findByUserNameAndIsDeletedIsFalse("luk111");
         Assertions.assertThat(user.getId()).isGreaterThan(0);
         Assertions.assertThat(user.getName()).isEqualTo("Luk");
         Assertions.assertThat(user.getAge()).isEqualTo(22);
